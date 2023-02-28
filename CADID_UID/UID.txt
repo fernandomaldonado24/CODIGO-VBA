@@ -1,0 +1,171 @@
+Sub UID()
+'On Error GoTo mensaje
+Application.ScreenUpdating = False
+'PARA LOS ARCHIVOS DE ORIGEN Y DESTINO
+Dim LibroOrigen As Workbook
+Dim HojaOrigen As Worksheet
+Dim LibroDestino As Workbook
+Dim HojaDestino As Worksheet
+Dim a As Integer
+Dim parte As String
+Dim contenido As String
+
+'ARCHIVO DESCARGADO DE ONLINE
+Dim nombre_archivo As String
+Dim extension As String
+
+'PARA LA BUSQUEDA EN EL DESTINO
+Dim Tabla As ListObject
+
+'PARA LA BUSQUEDA EN EL ORIGEN
+Dim celda_origen As range
+Dim rango_origen As range
+
+nombre_archivo = InputBox("Ingresar Nombre del Archivo", "Nombre del Archivo")
+
+If nombre_archivo <> "" Then
+    nombre_archivo = " (" & nombre_archivo & ")"
+End If
+
+'DATOS DESTINO
+Set LibroDestino = ActiveWorkbook
+Set HojaDestino = LibroDestino.Worksheets("CAD")
+
+'DATOS ORIGEN
+Set LibroOrigen = Workbooks("RadGridExport" & nombre_archivo & ".xls")
+Set HojaOrigen = LibroOrigen.Worksheets("RadGridExport" & nombre_archivo)
+
+'RANGO DE LA TABLA DESTINO
+Set Tabla = HojaDestino.ListObjects("tabla")
+Set rango_destino = Tabla.DataBodyRange.Columns(2)
+
+
+'COLUMNAS DONDE SE UBICA LA DATA A EXTRAER EN EL ARCHIVO DESCARGADO DE ONLINE
+Dim CUIM As String
+Dim UID As String
+Dim Mid As String
+Dim Cad As String
+Dim CUIM_numero As Integer
+Dim UID_numero As Integer
+Dim Mid_numero As Integer
+Dim Cad_numero As Integer
+
+For n = 1 To 12
+    If HojaOrigen.Cells(1, n) = "CUIM" Then
+        CUIM_numero = n
+        If n = 1 Then
+            CUIM = "A"
+        ElseIf n = 2 Then
+            CUIM = "B"
+        ElseIf n = 3 Then
+            CUIM = "C"
+        ElseIf n = 4 Then
+            CUIM = "D"
+        ElseIf n = 5 Then
+            CUIM = "E"
+        ElseIf n = 6 Then
+            CUIM = "F"
+        ElseIf n = 7 Then
+            CUIM = "G"
+        ElseIf n = 8 Then
+            CUIM = "H"
+        End If
+    End If
+    If HojaOrigen.Cells(1, n) = "UID" Then
+        UID_numero = n
+        If n = 1 Then
+            UID = "A"
+        ElseIf n = 2 Then
+            UID = "B"
+        ElseIf n = 3 Then
+            UID = "C"
+        ElseIf n = 4 Then
+            UID = "D"
+        ElseIf n = 5 Then
+            UID = "E"
+        ElseIf n = 6 Then
+            UID = "F"
+        ElseIf n = 7 Then
+            UID = "G"
+        ElseIf n = 8 Then
+            UID = "H"
+        End If
+    End If
+    If HojaOrigen.Cells(1, n) = "Mid" Then
+        Mid_numero = n
+        If n = 1 Then
+            Mid = "A"
+        ElseIf n = 2 Then
+            Mid = "B"
+        ElseIf n = 3 Then
+            Mid = "C"
+        ElseIf n = 4 Then
+            Mid = "D"
+        ElseIf n = 5 Then
+            Mid = "E"
+        ElseIf n = 6 Then
+            Mid = "F"
+        ElseIf n = 7 Then
+            Mid = "G"
+        ElseIf n = 8 Then
+            Mid = "H"
+        End If
+    End If
+    If HojaOrigen.Cells(1, n) = " Cad" Then
+        Cad_numero = n
+        If n = 1 Then
+             Cad = "A"
+        ElseIf n = 2 Then
+             Cad = "B"
+        ElseIf n = 3 Then
+             Cad = "C"
+        ElseIf n = 4 Then
+             Cad = "D"
+        ElseIf n = 5 Then
+             Cad = "E"
+        ElseIf n = 6 Then
+             Cad = "F"
+        ElseIf n = 7 Then
+             Cad = "G"
+        ElseIf n = 8 Then
+             Cad = "H"
+        End If
+    End If
+Next n
+
+ufila = HojaOrigen.Cells(Rows.Count, 2).End(xlUp).Row
+
+Set rango_origen = HojaOrigen.range(CUIM & "2" & ":" & CUIM & ufila)
+
+'BUSQUEDA DE LOS DATOS DE LA HOJA DESTINO EN LA HOJA ORIGEN
+For celda = 1 To Tabla.DataBodyRange.Rows.Count
+    a = 2
+    For Each celda_origen In rango_origen
+        If Tabla.DataBodyRange(celda, 2) = HojaOrigen.Cells(a, CUIM_numero) Then
+            Tabla.DataBodyRange(celda, 3) = HojaOrigen.Cells(a, UID_numero)
+            Tabla.DataBodyRange(celda, 4) = HojaOrigen.Cells(a, Cad_numero)
+            Tabla.DataBodyRange(celda, 5) = HojaOrigen.Cells(a, Mid_numero)
+            Exit For
+        End If
+        a = a + 1
+    Next celda_origen
+Next
+
+With Tabla.DataBodyRange
+    For i = 1 To .Rows.Count
+        If (.range("d" & i) <> 0) And (.range("e" & i) <> 0) Then
+        contador = contador + 1
+            If (.range("d" & i) = .range("f" & i)) And (.range("e" & i) = .range("g" & i)) Then
+                .Rows(i).Delete
+                i = i - 1
+            End If
+        End If
+    Next
+End With
+
+MsgBox "El proceso ha finalizado"
+Exit Sub
+mensaje:
+MsgBox "El archivo " & "RadGridExport " & "(" & nombre_archivo & ")" & " no se encuentra abierto o ha especificado un nombre incorrrecto"
+
+End Sub

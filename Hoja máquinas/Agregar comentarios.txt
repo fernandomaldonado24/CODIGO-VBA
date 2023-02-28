@@ -1,0 +1,49 @@
+Sub Agregar_Comentarios()
+Application.ScreenUpdating = False
+On Error GoTo final:
+Dim celda As range
+Dim rng As range
+Dim tabla As ListObject
+Dim color As Integer
+Dim R As Integer
+Dim G As Integer
+Dim B As Integer
+Set tabla = ActiveWorkbook.Sheets("CAD").ListObjects("maquinas")
+Set rng = ActiveSheet.UsedRange
+
+On Error GoTo final:
+
+For Each celda In rng
+    If Len(celda) > 0 Then
+        If IsNumeric(celda) Or IsNumeric(Left(celda, Len(celda) - 1)) Then
+            For n = 1 To tabla.DataBodyRange.Rows.Count
+                If celda = tabla.DataBodyRange.Rows(n).Columns(1) Then
+                    If celda.Comment Is Nothing Then
+                        celda.AddComment CStr(tabla.DataBodyRange.Rows(n).Columns(2))
+                        celda.Comment.Shape.TextFrame.Characters.Font.Size = 10
+                        celda.Comment.Shape.TextFrame.Characters.Font.Bold = True
+                        celda.Comment.Shape.Fill.ForeColor.RGB = RGB(127, 170, 191)
+                        celda.Comment.Shape.TextFrame.AutoSize = True
+                    Else
+                        celda.Comment.Delete
+                        celda.AddComment CStr(tabla.DataBodyRange.Rows(n).Columns(2))
+                        celda.Comment.Shape.TextFrame.Characters.Font.Size = 10
+                        celda.Comment.Shape.TextFrame.Characters.Font.Bold = True
+                        celda.Comment.Shape.Fill.ForeColor.RGB = RGB(127, 170, 191)
+                        celda.Comment.Shape.TextFrame.AutoSize = True
+                    End If
+                End If
+            Next
+        Else:
+            GoTo siguiente:
+        End If
+    Else
+        GoTo siguiente:
+    End If
+siguiente:
+Next celda
+
+Exit Sub
+final:
+Exit Sub
+End Sub

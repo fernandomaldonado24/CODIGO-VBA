@@ -1,0 +1,74 @@
+﻿Sub plantilla_OTAROLA()
+
+Dim rng As range
+Dim ruta As String
+Dim libro_origen As Workbook
+Dim hoja_origen As Worksheet
+Dim libro_destino As Workbook
+Dim hoja_destino As Worksheet
+Dim mensaje_MAYDA As String
+Dim SALA As String
+Dim total_maquinas As Integer
+Dim espacios_dentro_RD As Integer
+Dim espacios_fuera_RD As Integer
+Dim POSICIONES As ListObject
+Dim sort_column As range
+
+ruta = Application.GetOpenFilename(Title:="Elija el archivo con el plano deseado")
+
+total_maquinas = 0
+espacios_dentro_RD = 0
+espacios_fuera_RD = 0
+nombre = ActiveWorkbook.Name
+SALA = Mid(nombre, InStr(1, nombre, "-") + 1, InStr(1, nombre, ".xlsx") - InStr(1, nombre, "-") - 1)
+Set libro_origen = ActiveWorkbook
+Set hoja_origen = libro_origen.ActiveSheet
+Set rng = hoja_origen.UsedRange
+Set libro_destino = Workbooks.Open(ruta)
+Set hoja_destino = libro_destino.Sheets("OTAROLA")
+Set POSICIONES = hoja_destino.ListObjects("POSICIONES")
+Set sort_column = range("POSICIONES[POSICIONES]")
+
+x = 1
+For Each celda In rng
+    If InStr(1, celda, "#") <> 0 And IsNumeric(Right(celda, Len(celda) - InStr(1, celda, "#"))) Then
+        total_maquinas = total_maquinas + 1
+        If celda.Interior.color = RGB(128, 128, 128) Then
+            x = x + 1
+            espacios_fuera_RD = espacios_fuera_RD + 1
+            hoja_destino.range(POSICIONES.range.Columns(2).Rows(x).Address) = Right(celda, Len(celda) - InStr(1, celda, "#"))
+        End If
+    End If
+Next celda
+
+If espacios_fuera_RD > 0 Then
+    'ORDENAMIENTO DE POSICIONES DE MENOR A MAYOR
+    With POSICIONES.Sort
+    .SortFields.Clear
+    .SortFields.Add Key:=sort_column, SortOn:=xlSortOnValues, Order:=xlAscending
+    .Header = xlYes
+    .Apply
+    End With
+    'NÚMEROS DE CADA POSICIÓN
+    For i = 1 To POSICIONES.DataBodyRange.Rows.Count
+        hoja_destino.range(POSICIONES.range.Columns(1).Rows(i + 1).Address) = i
+    Next
+End If
+'ELABORACIÓN DE LA PLANTILLA A OTÁROLA Y MAYDA
+espacios_dentro_RD = total_maquinas - espacios_fuera_RD
+
+                'MENSAJE MAYDA
+mensaje_MAYDA = "Total de máquinas que tendrá la nueva RD son "
+hoja_destino.range("a2") = mensaje_MAYDA & espacios_dentro_RD
+                'MENSAJE OTAROLA
+mensaje_OTAROLA = "Sala "
+hoja_destino.range("a4") = mensaje_OTAROLA & SALA
+'TOTAL MAQUINAS SEGUN INDECI
+hoja_destino.range("b5") = total_maquinas
+'MAQUINAS ENCENDIDAS
+hoja_destino.range("b6") = espacios_dentro_RD
+'MAQUINAS APAGADAS
+hoja_destino.range("b7") = espacios_fuera_RD
+Exit Sub
+final:
+End Sub

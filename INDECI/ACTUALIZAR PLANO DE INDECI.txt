@@ -1,0 +1,35 @@
+Sub ACTUALIZAR_PLANO_INDECI()
+Application.ScreenUpdating = False
+On Error Resume Next
+pregunta = MsgBox("¿Seguro que desea actualizar le Plano de INDECI?", vbYesNo)
+
+If pregunta = vbYes Then
+    Dim rng As range
+    Dim libro As Workbook
+    Dim hoja As Worksheet
+    Dim hoja_indeci As Worksheet
+    Dim direccion As String
+    Set libro = ActiveWorkbook
+    Set hoja = libro.ActiveSheet
+    Set hoja_indeci = libro.Sheets("INDECI")
+    Set rng = hoja.UsedRange
+
+    For Each celda In rng
+        If InStr(1, celda, "#") <> 0 Then
+            direccion = celda.Address
+            If celda.Interior.color = RGB(128, 128, 128) Then
+                hoja_indeci.range(direccion).Cells(1, 1).Interior.color = RGB(128, 128, 128)
+                hoja_indeci.range(direccion).Cells(0, 1).Interior.color = RGB(128, 128, 128)
+                hoja_indeci.range(direccion).Cells(-1, 1).Interior.color = RGB(128, 128, 128)
+            ElseIf Not (celda.Interior.color = RGB(128, 128, 128)) Then
+                hoja_indeci.range(direccion).Cells(1, 1).Interior.color = RGB(255, 255, 255)
+                hoja_indeci.range(direccion).Cells(0, 1).Interior.color = RGB(255, 255, 255)
+                hoja_indeci.range(direccion).Cells(-1, 1).Interior.color = RGB(255, 255, 255)
+            End If
+        End If
+    Next celda
+End If
+
+Exit Sub
+final:
+End Sub

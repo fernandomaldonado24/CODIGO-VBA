@@ -1,0 +1,40 @@
+Sub ACTUALIZAR_PLANO_SEGUN_INDECI()
+Application.ScreenUpdating = False
+On Error Resume Next
+Dim rng As range
+Dim libro As Workbook
+Dim hoja As Worksheet
+Dim hoja_indeci As Worksheet
+Dim direccion As String
+Dim posicion1 As Integer
+Dim posicion2 As Integer
+
+Set libro = ActiveWorkbook
+Set hoja = libro.ActiveSheet
+Set hoja_indeci = libro.Sheets("INDECI")
+Set rng = hoja_indeci.UsedRange
+
+For Each celda In rng
+    If InStr(1, celda, "#") <> 0 Then
+        direccion = celda.Address
+        posicion1_# = InStr(1, celda, "#")
+        pos1 = Right(celda, Len(celda) - posicion1_#)
+        posicion2_# = InStr(1, hoja.range(direccion), "#")
+        pos2 = Right(hoja.range(direccion), Len(hoja.range(direccion)) - posicion2_#)
+        If InStr(1, hoja.range(direccion), "#") = 0 Then
+            hoja.range(direccion).Interior.color = RGB(112, 48, 160)
+        Else
+            If celda.Interior.color = RGB(128, 128, 128) Then
+                hoja.range(direccion).Cells(1, 1).Interior.color = RGB(128, 128, 128)
+                hoja.range(direccion).Cells(0, 1).Interior.color = RGB(128, 128, 128)
+                hoja.range(direccion).Cells(-1, 1).Interior.color = RGB(128, 128, 128)
+            End If
+            If Len(hoja.range(direccion).Cells(0, 1)) > 0 And Len(hoja.range(direccion).Cells(-1, 1)) > 0 Then
+                hoja.range(direccion) = Replace(hoja.range(direccion), pos2, pos1)
+            Else
+                hoja.range(direccion) = "#" & pos1
+            End If
+        End If
+    End If
+Next celda
+End Sub

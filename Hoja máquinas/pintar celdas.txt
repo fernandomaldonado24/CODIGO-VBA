@@ -1,0 +1,73 @@
+Sub pintar_celda1_hoja_máquinas()
+Application.ScreenUpdating = False
+Dim celda As range
+Dim rng As range
+Dim tabla As ListObject
+Dim color As Integer
+Dim R As Integer
+Dim G As Integer
+Dim B As Integer
+
+Set tabla = ActiveWorkbook.Sheets("CAD").ListObjects("maquinas")
+Set rng = ActiveSheet.UsedRange
+
+On Error GoTo final:
+
+
+color = InputBox("Ingrese el color deseado:" + Chr(13) + "rojo =             1" + Chr(13) + "amarillo =     2" + Chr(13) + "naranja =      3" + Chr(13) + "azul =            4" + Chr(13) + "blanco =       5" + Chr(13) + "ocre =       6", "Color")
+If color <> 1 And color <> 2 And color <> 3 And color <> 4 And color <> 5 And color <> 6 Then
+    GoTo mensaje1:
+End If
+If color = 1 Then
+    R = 255
+    G = 0
+    B = 0
+ElseIf color = 2 Then
+    R = 255
+    G = 255
+    B = 0
+ElseIf color = 3 Then
+    R = 255
+    G = 192
+    B = 0
+ElseIf color = 4 Then
+    R = 0
+    G = 112
+    B = 192
+ElseIf color = 5 Then
+    R = 255
+    G = 255
+    B = 255
+ElseIf color = 6 Then
+    R = 196
+    G = 187
+    B = 8
+End If
+
+For Each celda In rng
+    If Len(celda) > 0 Then
+        If IsNumeric(celda) Or IsNumeric(Left(celda, Len(celda) - 1)) Then
+            For n = 1 To tabla.DataBodyRange.Rows.Count
+                If celda = tabla.DataBodyRange.Rows(n).Columns(1) Then
+                        celda.Cells(1, 1).Interior.color = RGB(R, G, B)
+                End If
+            Next
+        Else:
+            GoTo siguiente:
+        End If
+    Else
+        GoTo siguiente:
+    End If
+siguiente:
+Next celda
+
+MsgBox "El proceso ha finalizado"
+Exit Sub
+mensaje1:
+MsgBox "NO INGRESAR COLORES QUE NO ESTÀN EN LA LISTA (ROJO,AMARILLO,NARANJA)"
+Exit Sub
+
+final:
+Exit Sub
+End Sub
+

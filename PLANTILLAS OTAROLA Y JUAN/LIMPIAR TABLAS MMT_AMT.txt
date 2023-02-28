@@ -1,0 +1,16 @@
+Sub LIMPIAR_INGRESOS_RETIROS()
+On Error Resume Next
+If ActiveSheet.Name = "EXPEDIENTE" Then
+    ActiveWorkbook.ActiveSheet.ListObjects(1).DataBodyRange.Delete
+    ActiveWorkbook.ActiveSheet.ListObjects(2).DataBodyRange.Delete
+    range("a1:d7").ClearContents
+    range("d8").ClearContents
+ElseIf ActiveSheet.Name = "OTAROLA" Then
+    range("a2:b2").ClearContents
+    range("a4:b4").ClearContents
+    range("b5").ClearContents
+    range("b6").ClearContents
+    range("b7").ClearContents
+    ActiveWorkbook.ActiveSheet.ListObjects(1).DataBodyRange.Delete
+End If
+End Sub

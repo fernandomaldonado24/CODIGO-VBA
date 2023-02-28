@@ -1,0 +1,22 @@
+Sub elimnar_registros()
+Dim HojaDatos As Worksheet
+Dim Tabla As ListObject
+Dim numero_tabla As Integer
+Dim tabla1 As ListObject
+Dim tabla2 As ListObject
+
+Set tabla1 = ActiveWorkbook.Sheets("CAD").ListObjects("tabla")
+Set tabla2 = ActiveWorkbook.Sheets("CAD").ListObjects("maquinas")
+
+On Error GoTo final:
+numero_tabla = InputBox("Ingresar el número de la tabla (1 o 2)", "Ingrese el número")
+
+If numero_tabla = 1 Then
+    tabla1.DataBodyRange.Delete
+ElseIf numero_tabla = 2 Then
+    tabla2.DataBodyRange.Delete
+End If
+
+Exit Sub
+final:
+End Sub

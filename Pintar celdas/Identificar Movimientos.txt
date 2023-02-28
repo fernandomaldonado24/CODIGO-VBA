@@ -1,0 +1,27 @@
+Sub identificar_movimientos()
+Dim rng1 As range
+Dim rng2 As range
+Dim celda1 As range
+Dim celda2 As range
+Dim nombre_hoja As String
+
+nombre_hoja = InputBox("Insertar nombre de la hoja a comparar", "Nombre de la Hoja")
+
+Set rng1 = ActiveSheet.UsedRange
+Set rng2 = Sheets(nombre_hoja).UsedRange
+
+For Each celda1 In rng1
+    If Len(celda1) > 0 And Not (IsNumeric(celda1.Cells(2, 1))) Then
+        If IsNumeric(celda1) Or IsNumeric(Left(celda1, Len(celda1) - 1)) Then
+            For Each celda2 In rng2
+                If celda1 = celda2 Then
+                    If celda1.Address <> celda2.Address Then
+                        celda1.Cells(2, 1).Interior.color = RGB(146, 208, 80)
+                    End If
+                End If
+            Next celda2
+        End If
+    End If
+Next celda1
+
+End Sub

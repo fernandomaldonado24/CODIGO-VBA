@@ -1,0 +1,78 @@
+Sub maq_inoperativas()
+Application.ScreenUpdating = False
+On Error GoTo final:
+                           ' ESPECTRO DE COLORES
+    Dim R As Integer
+    Dim G As Integer
+    Dim B As Integer
+                           ' MEDIDAS ESTADÍSTICAS
+    Dim promedio As Long
+    Dim min As Long
+    Dim max As Long
+    Dim sigma As Long
+                           ' BUCLE EN EL PLANO
+    Dim rng As range
+    Dim celda As range
+                           ' BUCLE EN LA TABLA
+    Dim Tabla1 As ListObject
+    Dim celda_columna1 As range
+    Dim rango_columna1 As range
+    Dim rango_columna3 As range
+    
+    
+    Dim conversion As Long
+' ENTRADA PARA DECIDIR SI SE EVALÚA TODO EL PLANO O SOLO UN GRUPO DE MÁQUINAS
+    Dim entrada As String
+                           ' PARA LA BÚSQUEDA DE MÁQUINAS EN LA TABLA
+    Dim rgfound As range
+                           ' ESTABLECIMIENTO DEL RANGO EN EL PLANO
+Set rng = ActiveSheet.UsedRange
+                           ' ESTABLECIENDO EL OBJETO DE LA TABLA
+Set Tabla1 = ActiveWorkbook.Sheets("CAD").ListObjects("maquinas")
+                                ' COLUMNA 1
+columna1 = Tabla1.DataBodyRange.Columns(1).Address
+Set rango_columna1 = Sheets("CAD").range(columna1)
+                                ' COLUMNA 3
+columna3 = Tabla1.DataBodyRange.Columns(3).Address
+Set rango_columna3 = Sheets("CAD").range(columna3)
+                           ' MEDIDAS ESTADÍSTICAS
+promedio = WorksheetFunction.Average(rango_columna3.SpecialCells(xlCellTypeVisible))
+sigma = Format(WorksheetFunction.StDev(rango_columna3.SpecialCells(xlCellTypeVisible)), "#,##0")
+min = Format(WorksheetFunction.min(rango_columna3.SpecialCells(xlCellTypeVisible)), "#,##0")
+max = Format(WorksheetFunction.max(rango_columna3.SpecialCells(xlCellTypeVisible)), "#,##0")
+                           ' ENTRADA PARA DECIDIR SI SE EVALÚA TODO EL PLANO O SOLO UN GRUPO DE MÁQUINAS
+entrada = UCase(InputBox("¿Desea evaluar toda la sala?", "Ingrese SI o NO"))
+
+For Each celda In rng
+    If Len(celda) > 0 Then
+        If IsNumeric(celda) Or IsNumeric(Left(celda, Len(celda) - 1)) Then
+                'BUSQUEDA DE LA MAQUINA EN LA LISTA
+            Set rgfound = rango_columna1.SpecialCells(xlCellTypeVisible).Find(celda)
+            If rgfound Is Nothing And Len(celda) > 0 Then
+                If entrada = "SI" Then
+                    MsgBox "La máquina " & celda & " no se encuentra dentro de la lista"
+                    GoTo 1:
+                ElseIf entrada = "NO" Then
+                    GoTo 1:
+                Else
+                    GoTo final:
+                End If
+            End If
+            For Each celda_columna1 In rango_columna1
+                If celda = celda_columna1 Then
+                    If IsEmpty(celda_columna1.Cells(1, 3)) Then
+                        celda.Interior.color = RGB(57, 98, 131)
+                        GoTo 1:
+                    End If
+                End If
+            Next celda_columna1
+        End If
+    End If
+1:
+
+Next celda
+Exit Sub
+final:
+End Sub
+
+

@@ -1,0 +1,88 @@
+Sub BuscarRegionActual()
+On Error GoTo mensaje:
+Application.ScreenUpdating = False
+Dim celda As Range
+Dim rng As Range
+Dim x As Integer
+Dim y As Integer
+x = 1
+y = 1
+
+     'Establecer que el rango sea la celda E11
+Set rng = ActiveSheet.UsedRange
+
+For Each celda In rng
+    If celda.Interior.color = RGB(146, 208, 80) Then
+'BUSQUEDA A LA DERECHA
+        If InStr(1, celda.Cells(x - 1, y + 1).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x - 1, y + 1), "*")
+            Cad = Left(celda.Cells(x - 1, y + 1), separador - 1)
+            ID = Mid(celda.Cells(x - 1, y + 1), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x - 1, y + 1).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+            
+        ElseIf InStr(1, celda.Cells(x, y + 1).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x, y + 1), "*")
+            Cad = Left(celda.Cells(x, y + 1), separador - 1)
+            ID = Mid(celda.Cells(x, y + 1), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x, y + 1).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+            
+        ElseIf InStr(1, celda.Cells(x + 1, y + 1).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x + 1, y + 1), "*")
+            Cad = Left(celda.Cells(x + 1, y + 1), separador - 1)
+            ID = Mid(celda.Cells(x + 1, y + 1), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x + 1, y + 1).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+'BUSQUEDA HACIA ABAJO
+        ElseIf InStr(1, celda.Cells(x + 2, y).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x + 2, y), "*")
+            Cad = Left(celda.Cells(x + 2, y), separador - 1)
+            ID = Mid(celda.Cells(x + 2, y), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x + 2, y).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+'BUSQUEDA A LA IZQUIERDA
+        ElseIf InStr(1, celda.Cells(x - 1, y - 1).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x - 1, y - 1), "*")
+            Cad = Left(celda.Cells(x - 1, y - 1), separador - 1)
+            ID = Mid(celda.Cells(x - 1, y - 1), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x - 1, y - 1).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+            
+        ElseIf InStr(1, celda.Cells(x, y - 1).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x, y - 1), "*")
+            Cad = Left(celda.Cells(x, y - 1), separador - 1)
+            ID = Mid(celda.Cells(x, y - 1), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x, y - 1).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+            
+        ElseIf InStr(1, celda.Cells(x + 1, y - 1).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x + 1, y - 1), "*")
+            Cad = Left(celda.Cells(x + 1, y - 1), separador - 1)
+            ID = Mid(celda.Cells(x + 1, y - 1), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x + 1, y - 1).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+'BUSQUEDA HACIA ARRIBA
+        ElseIf InStr(1, celda.Cells(x - 2, y).Value, "*") <> 0 Then
+            separador = InStr(1, celda.Cells(x - 2, y), "*")
+            Cad = Left(celda.Cells(x - 2, y), separador - 1)
+            ID = Mid(celda.Cells(x - 2, y), separador + 1, 10)
+            Call Llenar_Tabla(celda.Cells(x - 2, y).Value, celda.Cells(x - 1, y).Value, Cad, ID)
+        End If
+    End If
+
+Next celda
+MsgBox "El proceso ha finalizado"
+Exit Sub
+mensaje:
+End Sub
+
+Sub Llenar_Tabla(CAD_ID, Nro_Maq, Cad, ID)
+Dim HojaDatos As Worksheet
+Dim Tabla As ListObject
+Dim NuevaFila As ListRow
+
+Set HojaDatos = ActiveWorkbook.Sheets("CAD")
+Set Tabla = HojaDatos.ListObjects("tabla")
+Set NuevaFila = Tabla.ListRows.Add
+
+With NuevaFila
+    .Range(1) = CAD_ID
+    .Range(2) = Nro_Maq
+    .Range(6) = Cad
+    .Range(7) = ID
+End With
+End Sub

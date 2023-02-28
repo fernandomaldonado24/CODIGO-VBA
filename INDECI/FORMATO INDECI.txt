@@ -1,0 +1,43 @@
+Sub borrar_celdas()
+On Error GoTo final:
+Dim rng1 As range
+Dim celda1 As range
+
+Sub FORMATO_INDECI()
+On Error GoTo final:
+Dim rng1 As range
+Dim celda1 As range
+
+
+Set rng1 = ActiveSheet.UsedRange
+
+For Each celda1 In rng1
+    If InStr(1, celda1, "#") <> 0 Then
+            celda1.Cells(0, 1).ClearContents
+            celda1.Cells(-1, 1).ClearContents
+                                    'DERECHA
+            If InStr(1, celda1.Cells(-1, 2).Value, "*") <> 0 Then
+                celda1.Cells(-1, 2).ClearContents
+            ElseIf InStr(1, celda1.Cells(0, 2).Value, "*") <> 0 Then
+                celda1.Cells(0, 2).ClearContents
+            ElseIf InStr(1, celda1.Cells(1, 2).Value, "*") <> 0 Then
+                celda1.Cells(1, 2).ClearContents
+                                    'ABAJO
+            ElseIf InStr(1, celda1.Cells(2, 1).Value, "*") <> 0 Then
+                celda1.Cells(2, 1).ClearContents
+                                    'IZQUIERDA
+            ElseIf InStr(1, celda1.Cells(-1, 0).Value, "*") <> 0 Then
+                celda1.Cells(-1, 0).ClearContents
+            ElseIf InStr(1, celda1.Cells(0, 0).Value, "*") <> 0 Then
+                celda1.Cells(0, 0).ClearContents
+            ElseIf InStr(1, celda1.Cells(1, 0).Value, "*") <> 0 Then
+                celda1.Cells(1, 0).ClearContents
+                                    'ARRIBA
+            ElseIf InStr(1, celda1.Cells(-2, 1).Value, "*") <> 0 Then
+                celda1.Cells(-2, 1).ClearContents
+            End If
+    End If
+Next celda1
+Exit Sub
+final:
+End Sub

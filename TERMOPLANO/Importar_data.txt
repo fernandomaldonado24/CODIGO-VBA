@@ -1,0 +1,62 @@
+Sub importar_datos()
+Application.ScreenUpdating = False
+On Error GoTo final:
+
+Dim criterio As String
+
+Dim libro_origen As Workbook
+Dim hoja_origen As Worksheet
+
+Dim libro_destino As Workbook
+Dim hoja_destino As Worksheet
+Dim tabla_maquinas As ListObject
+
+Dim libro_salas As Workbook
+Dim hoja_salas As Worksheet
+Dim Tabla As ListObject
+
+Set libro_destino = ActiveWorkbook
+Set hoja_destino = libro_destino.Sheets("CAD")
+Set tabla_maquinas = hoja_destino.ListObjects("maquinas")
+columna_maquinas = tabla_maquinas.range.Columns(1).Rows(2).Address
+columna_MARCA_MODELO = tabla_maquinas.range.Columns(2).Rows(2).Address
+columna_JUEGO = tabla_maquinas.range.Columns(3).Rows(2).Address
+columna_COIN = tabla_maquinas.range.Columns(4).Rows(2).Address
+columna_NW_REAL = tabla_maquinas.range.Columns(5).Rows(2).Address
+columna_NW_TEORICO = tabla_maquinas.range.Columns(6).Rows(2).Address
+columna_DIAS_OPERATIVOS = tabla_maquinas.range.Columns(7).Rows(2).Address
+
+
+Dim ruta_salas As String
+Dim ruta As String
+Dim rgfound As range
+
+ruta = Application.GetOpenFilename(Title:="Por favor seleccione un libro")
+
+If ruta = "False" Then
+    Exit Sub
+End If
+
+nombre = ActiveWorkbook.Name
+criterio = Mid(nombre, InStr(1, nombre, "-") + 1, InStr(1, nombre, ".xlsx") - InStr(1, nombre, "-") - 1)
+
+Set libro_origen = Workbooks.Open(ruta)
+Set hoja_origen = libro_origen.Sheets(1)
+ufila = hoja_origen.range("a" & Rows.Count).End(xlUp).Row
+
+hoja_origen.range("a" & ufila).AutoFilter field:=1, Criteria1:=criterio
+ufila = hoja_origen.range("a" & Rows.Count).End(xlUp).Row
+
+hoja_origen.range("b2:b" & ufila).Copy Destination:=hoja_destino.range(columna_maquinas)
+hoja_origen.range("c2:c" & ufila).Copy Destination:=hoja_destino.range(columna_MARCA_MODELO)
+hoja_origen.range("d2:d" & ufila).Copy Destination:=hoja_destino.range(columna_JUEGO)
+hoja_origen.range("e2:e" & ufila).Copy Destination:=hoja_destino.range(columna_COIN)
+hoja_origen.range("g2:g" & ufila).Copy Destination:=hoja_destino.range(columna_NW_REAL)
+hoja_origen.range("h2:h" & ufila).Copy Destination:=hoja_destino.range(columna_NW_TEORICO)
+hoja_origen.range("f2:f" & ufila).Copy Destination:=hoja_destino.range(columna_DIAS_OPERATIVOS)
+
+
+Workbooks(libro_origen.Name).Close savechanges:=False
+Exit Sub
+final:
+End Sub

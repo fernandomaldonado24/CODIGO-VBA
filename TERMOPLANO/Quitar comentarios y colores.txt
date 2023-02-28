@@ -1,0 +1,76 @@
+Sub Quitar_comentarios_colores()
+hoja_actual = ActiveSheet.Name
+Application.ScreenUpdating = False
+Dim celda As range
+Dim rng As range
+Dim Tabla As ListObject
+Dim color As Integer
+Dim R As Integer
+Dim G As Integer
+Dim B As Integer
+Dim pregunta As String
+
+R = 255
+G = 255
+B = 255
+
+
+Set rng = ActiveSheet.UsedRange
+
+On Error GoTo final:
+
+pregunta = MsgBox("¿Seguro que desea despintar todo?", vbYesNo)
+
+If pregunta = vbYes Then
+    GoTo iniciar:
+Else
+    GoTo final:
+End If
+
+iniciar:
+For Each celda In rng
+    If Len(celda) > 0 And Not (IsNumeric(celda.Cells(2, 1))) Then
+        If IsNumeric(celda) Or IsNumeric(Left(celda, Len(celda) - 1)) Then
+                        celda.Cells(1, 1).Interior.color = RGB(R, G, B)
+                        celda.Cells(2, 1).Interior.color = RGB(R, G, B)
+                        celda.Cells(3, 1).Interior.color = RGB(R, G, B)
+            If celda.Comment Is Nothing Then
+                GoTo siguiente:
+            Else
+                celda.Comment.Delete
+            End If
+        Else:
+            GoTo siguiente:
+        End If
+    Else
+        GoTo siguiente:
+    End If
+siguiente:
+Next celda
+
+Worksheets("CAD").Select
+Call eliminar_datos_tabla("maquinas")
+ActiveWorkbook.Sheets(hoja_actual).Select
+
+MsgBox "El proceso ha finalizado"
+
+Exit Sub
+
+final:
+Exit Sub
+End Sub
+
+Sub eliminar_datos_tabla(nombre_tabla)
+Dim HojaDatos As Worksheet
+Dim Tabla As ListObject
+
+On Error GoTo final:
+
+Set HojaDatos = ActiveWorkbook.ActiveSheet
+Set Tabla = HojaDatos.ListObjects(nombre_tabla)
+
+Tabla.DataBodyRange.Delete
+Sheets(previa).Activate
+Exit Sub
+final:
+End Sub

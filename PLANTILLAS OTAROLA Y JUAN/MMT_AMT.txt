@@ -1,0 +1,205 @@
+Sub MMT()
+Application.ScreenUpdating = False
+On Error Resume Next
+Worksheets("TABLA").Delete
+Dim rng As range
+Dim esquina_1 As String
+Dim esquina_2 As String
+Dim rango As range
+Dim libro_origen As Workbook
+Dim hoja_origen As Worksheet
+Dim libro_destino As Workbook
+Dim hoja_destino As Worksheet
+Dim tabla_ingresos As ListObject
+Dim tabla_retiros As ListObject
+Dim ruta As String
+Dim JUEGOS As Integer
+Dim RET As Integer
+Dim ING As Integer
+Dim cont_ingresos As Integer
+Dim cont_retiros As Integer
+Dim contenido As String
+Dim parte As String
+
+JUEGOS = 0
+RET = 0
+ING = 0
+cont_ingresos = 0
+cont_retiros = 0
+
+ruta = Application.GetOpenFilename(Title:="Elija el archivo con el MMT deseado")
+
+Set libro_destino = ActiveWorkbook
+Set hoja_destino = libro_destino.Sheets("EXPEDIENTE")
+Set libro_origen = Workbooks.Open(ruta)
+Set hoja_origen = libro_origen.Sheets("DATOS")
+Set tabla_ingresos = hoja_destino.ListObjects("INGRESOS")
+Set tabla_retiros = hoja_destino.ListObjects("RETIROS")
+Set rng = hoja_origen.UsedRange
+INGRESOS = tabla_ingresos.range.Columns(1).Rows(2).Address
+RETIROS = tabla_retiros.range.Columns(1).Rows(2).Address
+
+
+For Each celda In rng
+'HAY JUEGOS?
+    If celda = "TIPO" Then
+        For i = 2 To celda.End(xlDown).Row
+            If celda.Cells(i, 1) = "AMT" Then
+                JUEGOS = JUEGOS + 1
+            End If
+        Next
+    End If
+'HAY RETIROS?
+    If celda = "TIPO" Then
+        For i = 2 To celda.End(xlDown).Row
+            If celda.Cells(i, 1) = "MMT" And Len(celda.Cells(i, 10)) > 0 Then
+                RET = RET + 1
+            End If
+        Next
+    End If
+'HAY INGRESOS?
+    If celda = "TIPO" Then
+        For i = 2 To celda.End(xlDown).Row
+            If celda.Cells(i, 1) = "MMT" And Len(celda.Cells(i, 2)) > 0 Then
+                ING = ING + 1
+            End If
+        Next
+    End If
+'SELECCIONAR EL RANGO DE DATOS
+    If celda = "Nº" Then
+        esquina_1 = celda.Address
+        fila = range(esquina_1).End(xlDown).Row
+        esquina_2 = "T" & fila
+    End If
+Next celda
+
+Set rango = hoja_origen.range(esquina_1 & ":" & esquina_2)
+'CREAR HOJA PARA TABLA DINAMICA
+Worksheets.Add(Before:=Worksheets("DATOS")).Name = "TABLA"
+'CREAR PIVOT CACHE
+Set PCache = libro_origen.PivotCaches.Create( _
+SourceType:=xlDatabase, SourceData:=rango)
+'CREAR TABLA DINAMICA EN BLANCO
+Set tabla = PCache.CreatePivotTable( _
+TableDestination:="TABLA!R3C1", TableName:="TABLA")
+
+'INGRESOS
+If ING > 0 Then
+    'AGREGAR FILAS Y VALORES
+    With tabla.PivotFields("MARCA/TIPO")
+        .Orientation = xlRowField
+        .Position = 1
+        .Orientation = xlDataField
+        .Position = 1
+        .Function = xlCount
+    End With
+    'AGREGAR FILTRO DE MMT/AMT
+    With tabla.PivotFields("TIPO")
+        .ClearAllFilters
+        .Orientation = xlPageField
+        On Error Resume Next
+        .CurrentPage = "MMT"
+    End With
+    tabla.ColumnGrand = False
+    contenido = ""
+    parte = ""
+    With tabla.TableRange1
+        For i = 2 To .Rows.Count
+            If Len(.range("b" & i)) > 0 And .range("a" & i) <> "/" Then
+                parte = "a" & i & ":b" & i & ","
+                contenido = contenido & parte
+                tabla_ingresos.ListRows.Add
+                cont_ingresos = cont_ingresos + 1
+            End If
+        Next
+        If Right(contenido, 1) = "," Then
+            contenido = Left(contenido, Len(contenido) - 1)
+        End If
+        .range(contenido).Copy
+        hoja_destino.range(INGRESOS).PasteSpecial xlPasteValues
+    End With
+    'LIMPIAR TABLA
+    tabla.ClearTable
+End If
+
+'RETIROS
+If RET > 0 Then
+    'AGREGAR FILAS Y VALORES
+    With tabla.PivotFields("MARCA/TIPO2")
+        .Orientation = xlRowField
+        .Position = 1
+        .Orientation = xlDataField
+        .Position = 1
+        .Function = xlCount
+    End With
+    'AGREGAR FILTRO DE MMT/AMT
+    With tabla.PivotFields("TIPO")
+        .ClearAllFilters
+        .Orientation = xlPageField
+        On Error Resume Next
+        .CurrentPage = "MMT"
+    End With
+    tabla.ColumnGrand = False
+    contenido = ""
+    parte = ""
+    With tabla.TableRange1
+        For i = 2 To .Rows.Count
+            If Len(.range("b" & i)) > 0 And .range("a" & i) <> "/" Then
+                parte = "a" & i & ":b" & i & ","
+                contenido = contenido & parte
+                tabla_retiros.ListRows.Add
+                cont_retiros = cont_retiros + 1
+            End If
+        Next
+        If Right(contenido, 1) = "," Then
+            contenido = Left(contenido, Len(contenido) - 1)
+        End If
+        .range(contenido).Copy
+        hoja_destino.range(RETIROS).PasteSpecial xlPasteValues
+    End With
+End If
+If RET > 0 Or ING > 0 Then
+    If cont_ingresos > cont_retiros Then
+        For i = 1 To (cont_ingresos - cont_retiros)
+            tabla_retiros.ListRows.Add
+        Next
+    Else
+        For i = 1 To (cont_retiros - cont_ingresos)
+            tabla_ingresos.ListRows.Add
+        Next
+    End If
+End If
+'JUEGOS
+hoja_destino.range("d8") = JUEGOS
+
+Workbooks(libro_origen.Name).Close savechanges:=False
+
+'INSERCIÓN DEL MENSAJE
+Dim ruta_limpia As String
+Dim encabezado1 As String
+Dim mensaje1_1 As String
+Dim nombre_sala As String
+Dim mensaje1_2 As String
+Dim MMT As String
+Dim complemento_MMT As String
+Dim encabezado2 As String
+Dim mensaje2 As String
+
+ruta_limpia = Mid(ruta, InStr(1, ruta, "#") + 1, InStr(1, ruta, ".xlsx") - InStr(1, ruta, "#") - 1)
+'PARTES DEL MENSAJE
+encabezado1 = "Estimado Ing. Juan Azabache, "
+mensaje1_1 = "se solicita un nuevo Anexo G para la sala "
+nombre_sala = Right(ruta_limpia, Len(ruta_limpia) - InStr(1, ruta_limpia, "_"))
+mensaje1_2 = ". Por este motivo se adjunta el MMT-"
+MMT = Left(ruta_limpia, InStr(1, ruta_limpia, "_") - 1)
+complemento_MMT = "-19."
+encabezado2 = "Estimadas Arq. Rosana Otarola y Srta. Mayda Bure, "
+mensaje2 = "enviar al Área Legal la documentación correspondiente al Anexo."
+'CONCATENADO DE LAS PARTES DEL MENSAJE
+range("a1") = encabezado1 & mensaje1_1 & nombre_sala & mensaje1_2 & MMT & complemento_MMT + vbCrLf + encabezado2 & mensaje2
+With range("a1")
+    .Font.Bold = True
+    .Interior.color = RGB(180, 198, 231)
+End With
+
+End Sub
